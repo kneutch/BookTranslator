@@ -1,0 +1,305 @@
+{
+  "spectrum_translation_spec": {
+    "version": "1.0",
+    "description": "Rules for generating gradual L1→L2 hybrid texts from aligned inputs.",
+    "inputs": {
+      "TEXT_L1": "string: full source text (e.g. English)",
+      "TEXT_L2": "string: full target text (e.g. German), sentence-aligned or alignable",
+      "LEVEL": "integer 1–7",
+      "TARGET_LANGUAGE": "string",
+      "OUTPUT_FORMAT": "plain_text"
+    },
+    "global_rules": {
+      "alignment": {
+        "method": "sentence_or_paragraph_alignment",
+        "fallback": "paragraph_if_sentence_alignment_missing",
+        "keep_structure": true,
+        "preserve_paragraphs": true
+      },
+      "text_type_priority": [
+        "dialogue",
+        "internal_monologue",
+        "scene_description"
+      ],
+      "vocabulary_introduction": {
+        "frequency_source": "TEXT_L2",
+        "max_new_items_per_1000_words": 15,
+        "first_use_gloss": true,
+        "gloss_format": "L2_word (L1_translation)",
+        "later_use_gloss": false,
+        "selection_order": "highest_frequency_not_yet_introduced"
+      },
+      "ratios_tolerance": 0.05,
+      "preserve_story_semantics": true,
+      "preserve_punctuation": true,
+      "preserve_dialogue_markers": true
+    },
+    "levels": [
+      {
+        "level": 1,
+        "name": "vocabulary_seed",
+        "target_L2_ratio": 0.05,
+        "structure": "L1_syntax_only",
+        "rules": {
+          "replace_content": {
+            "nouns_per_100_words": {
+              "min": 1,
+              "max": 3
+            },
+            "verbs": "none",
+            "adjectives": "none"
+          },
+          "article_handling": "keep_L1_articles",
+          "glossing": "always_for_new_L2_word",
+          "dialogue": "keep_L1",
+          "scene_description": "keep_L1"
+        },
+        "progression_within_level": {
+          "start_chapters": {
+            "L2_ratio_multiplier": 0.5
+          },
+          "end_chapters": {
+            "L2_ratio_multiplier": 1.0
+          }
+        }
+      },
+      {
+        "level": 2,
+        "name": "mixed_lexicon",
+        "target_L2_ratio": 0.10,
+        "structure": "L1_syntax_only",
+        "rules": {
+          "replace_content": {
+            "overall_content_words_percent": {
+              "min": 0.05,
+              "max": 0.10
+            },
+            "priority": [
+              "high_frequency_nouns",
+              "common_verbs",
+              "basic_adjectives"
+            ]
+          },
+          "article_handling": "introduce_L2_articles_with_L2_nouns",
+          "glossing": "first_use_only",
+          "dialogue": {
+            "allow_short_L2_expressions": true,
+            "examples": ["Ja", "Nein", "Danke", "Guten Morgen"]
+          },
+          "syntactic_change": "none"
+        },
+        "progression_within_level": {
+          "start_chapters": {
+            "L2_ratio_multiplier": 0.6
+          },
+          "end_chapters": {
+            "L2_ratio_multiplier": 1.1
+          }
+        }
+      },
+      {
+        "level": 3,
+        "name": "syntax_drift",
+        "target_L2_ratio": 0.20,
+        "structure": "mixed_L1_L2_syntax",
+        "rules": {
+          "replace_content": {
+            "overall_content_words_percent": {
+              "min": 0.15,
+              "max": 0.25
+            },
+            "priority": [
+              "nouns_with_gender",
+              "modal_verbs",
+              "simple_verbs",
+              "adjectives_in_attributive_position"
+            ]
+          },
+          "article_handling": "use_L2_articles_consistently_for_any_L2_noun",
+          "syntax": {
+            "apply_L2_word_order_in": [
+              "simple_main_clauses_if_clear",
+              "yes_no_questions",
+              "short_subordinate_clauses"
+            ],
+            "examples": [
+              "Ich have the wand",
+              "Heute geht er to the market"
+            ]
+          },
+          "dialogue": {
+            "allow_full_simple_L2_sentences": true,
+            "max_consecutive_L2_dialogue_sentences": 2
+          },
+          "scene_description": {
+            "insert_L2_adjective_phrases": true
+          },
+          "glossing": "first_use_only"
+        },
+        "progression_within_level": {
+          "start_chapters": {
+            "L2_ratio_multiplier": 0.7
+          },
+          "end_chapters": {
+            "L2_ratio_multiplier": 1.2
+          }
+        }
+      },
+      {
+        "level": 4,
+        "name": "structural_balance",
+        "target_L2_ratio": 0.50,
+        "structure": "phrase_level_bilingual",
+        "rules": {
+          "replace_content": {
+            "overall_content_words_percent": {
+              "min": 0.45,
+              "max": 0.55
+            },
+            "priority": [
+              "all_previously_introduced_vocab",
+              "common_prepositions",
+              "auxiliaries",
+              "connectors"
+            ]
+          },
+          "syntax": {
+            "use_L2_word_order_consistently": true,
+            "apply_to": [
+              "subordinate_clauses",
+              "relative_clauses",
+              "questions"
+            ],
+            "allow_bilingual_sentences": true,
+            "example": "Der Junge raised his wand toward den Himmel."
+          },
+          "dialogue": {
+            "default": "L2",
+            "allow_L1_tags": true
+          },
+          "scene_description": {
+            "mixed_phrases": true,
+            "max_consecutive_full_L2_sentences": 2
+          },
+          "glossing": "only_for_low_frequency_items"
+        },
+        "progression_within_level": {
+          "start_chapters": {
+            "L2_ratio_multiplier": 0.8
+          },
+          "end_chapters": {
+            "L2_ratio_multiplier": 1.1
+          }
+        }
+      },
+      {
+        "level": 5,
+        "name": "dominant_L2",
+        "target_L2_ratio": 0.75,
+        "structure": "L2_syntax_with_L1_support",
+        "rules": {
+          "replace_content": {
+            "overall_content_words_percent": {
+              "min": 0.70,
+              "max": 0.80
+            },
+            "priority": [
+              "remaining_core_verbs",
+              "tense_markers",
+              "case_marking_prepositions"
+            ]
+          },
+          "syntax": {
+            "fully_follow_L2_grammar": true,
+            "verb_placement": "L2",
+            "case_marking": "L2",
+            "agreement": "L2"
+          },
+          "dialogue": {
+            "full_L2": true,
+            "allow_parenthetical_L1_for_rare_idioms": true
+          },
+          "scene_description": {
+            "primarily_L2": true,
+            "allow_rare_L1_bridge_words": true
+          },
+          "glossing": {
+            "on_first_use_of_very_rare_word": true,
+            "format": "L2 (L1)"
+          }
+        },
+        "progression_within_level": {
+          "start_chapters": {
+            "L2_ratio_multiplier": 0.9
+          },
+          "end_chapters": {
+            "L2_ratio_multiplier": 1.05
+          }
+        }
+      },
+      {
+        "level": 6,
+        "name": "full_grammar_minimal_scaffold",
+        "target_L2_ratio": 0.93,
+        "structure": "L2_with_optional_parenthetical_L1",
+        "rules": {
+          "replace_content": {
+            "overall_content_words_percent": {
+              "min": 0.90,
+              "max": 0.95
+            },
+            "priority": [
+              "all_remaining_lexical_items",
+              "stylistic_expressions",
+              "register_specific_vocabulary"
+            ]
+          },
+          "syntax": {
+            "strict_L2": true,
+            "allow_register_variation": true
+          },
+          "dialogue": {
+            "strict_L2": true
+          },
+          "scene_description": {
+            "strict_L2": true
+          },
+          "glossing": {
+            "rare": true,
+            "only_for_non_compositional_idioms": true,
+            "format": "(= L1 ...)"
+          }
+        },
+        "progression_within_level": {
+          "start_chapters": {
+            "L2_ratio_multiplier": 1.0
+          },
+          "end_chapters": {
+            "L2_ratio_multiplier": 1.0
+          }
+        }
+      },
+      {
+        "level": 7,
+        "name": "full_target_language",
+        "target_L2_ratio": 1.0,
+        "structure": "TEXT_L2_as_is",
+        "rules": {
+          "output": "return_TEXT_L2",
+          "glossing": "none",
+          "modifications": "none"
+        }
+      }
+    ],
+    "generation_pipeline": {
+      "steps": [
+        "load_TEXT_L1_and_TEXT_L2",
+        "align_sentences_or_paragraphs",
+        "for_each_aligned_unit_apply_level_rules",
+        "enforce_target_L2_ratio_with_tolerance",
+        "preserve_paragraph_and_dialogue_structure",
+        "emit_plain_text_output"
+      ]
+    }
+  }
+}

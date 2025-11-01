@@ -1,0 +1,28 @@
+{
+  "name": "book-translator-node",
+  "version": "1.0.0",
+  "description": "Node.js orchestrator for generating gradual bilingual book translations",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "keywords": [
+    "translation",
+    "language-learning",
+    "pdf",
+    "bilingual"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "openai": "^4.20.1",
+    "pdfkit": "^0.13.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
