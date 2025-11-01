@@ -5,6 +5,7 @@
  * without requiring OpenAI API calls
  */
 
+import 'dotenv/config';
 import axios from 'axios';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -13,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ALIGNER_URL = 'http://localhost:8000/align/files';
+const ALIGNER_URL = process.env.ALIGNER_URL || 'http://localhost:8000/align/files';
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const DATA_DIR = path.join(PROJECT_ROOT, 'data');
 

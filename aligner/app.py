@@ -186,7 +186,8 @@ def run_a_studio_cli(en_text: str, de_text: str) -> Dict[str, Any]:
             raise Exception("a-studio did not produce output file")
     
     except FileNotFoundError:
-        # a-studio command not found, use fallback
+        # a-studio command not found in PATH, use fallback
+        # This is raised by subprocess.run when the command does not exist
         logger.warning("a-studio not found, using simple paragraph alignment fallback")
         return run_simple_paragraph_alignment(en_text, de_text)
     except subprocess.CalledProcessError as e:
