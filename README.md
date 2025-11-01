@@ -2,6 +2,20 @@
 
 A sophisticated book translation system that generates gradual bilingual texts for language learning. The system creates 7 progressive levels from pure English to pure German, with each level introducing more target language vocabulary and grammar structures.
 
+---
+
+## ⚡ Quick Start
+
+**New here?** Check out the [**QUICKSTART.md**](QUICKSTART.md) guide for a 5-minute setup!
+
+Already have the project? Run this to test:
+```bash
+cd aligner && uvicorn app:app --port 8000 &
+cd node && npm test
+```
+
+---
+
 ## 📖 Overview
 
 This project transforms parallel texts (English and German) in **PDF or EPUB format** into hybrid learning materials where:
